@@ -1,1 +1,2 @@
-/cmake-build-debug/
+# Build debug directory.
+/cmake-build-debug
