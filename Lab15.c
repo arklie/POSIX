@@ -1,16 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int main() {
-    char letter;
+    void flushStdin(FILE*);
+    char letter, *p = (char*) malloc(sizeof(char)*4);
     int grade;
     do {
+        grade = -1;
         char *buff = (char*) malloc(sizeof(char)*4);
-        printf("Enter grade from 0 to 100: ");
-        fgets(buff, sizeof(char) * 3, stdin);
+        printf("Enter grade from 0 to 100:");
+        fgets(buff, sizeof(char) * 4, stdin);
         grade = atoi(buff);
-        printf("Grade: %i\n", grade);
-    } while (grade < 0 || grade > 100 || grade == '\n' || grade == '\0'); // If grade is not from 0 to 100, prompt again.
+        if (buff[strlen(buff) - 1] == '\n')
+            buff[strlen(buff) - 1] = '\0';
+        flushStdin(stdin);
+        sprintf(p, "%d", grade);
+        if (strcmp(p, buff) != 0) {
+            grade = -1;
+            printf("%s was not in the range of valid integers and/or was not an integer.\n\n", buff);
+        }
+    } while (grade < 0 || grade > 100); // If grade is not from 0 to 100, prompt again.
 
     if (grade < 50) // Since we never let a value less than 0 out of the do while, there is no need to check for a 'below 0' case.
         letter = 'F';
@@ -24,4 +34,8 @@ int main() {
         letter = 'A';
 
     printf("Letter Grade: %c", letter);
+}
+
+void flushStdin(FILE *fp) {
+    fseek(fp, 0, SEEK_END);
 }
