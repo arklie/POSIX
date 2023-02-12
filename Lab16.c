@@ -19,7 +19,6 @@ int main() {
     int n, *res, total = 0;
     printf("Enter number of alternating series: ");
     fgets(buff, sizeof(buff), stdin);
-    printf("%d", n);
     n = atoi(buff);
 
     if (!isDigit(buff, &n)) {
@@ -28,20 +27,20 @@ int main() {
 
     res = malloc(sizeof(int) * n);
 
-    for (int i = 0; i <= n; i++) {
-        if (n % 2 == 0) {
-            res[i] = - (i + 1);
-            total -= i + 1;
+    for (int i = 1; i <= n; i++) {
+        if (i % 2 == 0) {
+            res[i-1] = -i;
+            total -= i;
         } else {
-            res[i] = i + 1;
-            total += i + 1;
+            res[i-1] = i;
+            total += i;
         }
     }
 
     for (int i = 0; i < n; i++) {
-        printf("%d", res[i]);
+        printf("%d ", res[i]);
     }
-    printf(" = %d\n", total);
+    printf("= %d\n", total);
 
     return 0;
 }
