@@ -1,4 +1,5 @@
 // Lab 2: Functions, Pointers, and Arrays.
+// Jon Mitchell & Tom Arklie
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,7 +29,7 @@ int main() {
     char buff[40];
     int num;
 
-    printf("Enter any integer: ");
+    printf("Enter any positive integer: ");
     fgets(buff, sizeof(buff), stdin);
     if (!isDigit(buff))
         return -1;
