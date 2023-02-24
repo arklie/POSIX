@@ -5,3 +5,4 @@ set(CMAKE_C_STANDARD 11)
 
 add_executable(Lab21 Lab21.c)
 add_executable(Lab22 Lab22.c)
+add_executable(Lab23 Lab23.c)
