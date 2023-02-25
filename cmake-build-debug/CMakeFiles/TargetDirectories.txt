@@ -1,6 +1,0 @@
-/home/Faarie/CLionProjects/arkliePOSIX/cmake-build-debug/CMakeFiles/Lab21.dir
-/home/Faarie/CLionProjects/arkliePOSIX/cmake-build-debug/CMakeFiles/Lab22.dir
-/home/Faarie/CLionProjects/arkliePOSIX/cmake-build-debug/CMakeFiles/Lab23.dir
-/home/Faarie/CLionProjects/arkliePOSIX/cmake-build-debug/CMakeFiles/Lab24.dir
-/home/Faarie/CLionProjects/arkliePOSIX/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/Faarie/CLionProjects/arkliePOSIX/cmake-build-debug/CMakeFiles/rebuild_cache.dir
