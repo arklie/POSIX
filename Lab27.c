@@ -26,7 +26,7 @@ int isDigit(char *in) { // Verify the input is a digit.
             }
         }
     }
-    char *p = malloc(sizeof(char) * strlen(in));
+    char *p = malloc(sizeof(char) * (strlen(in) + 1));
     // ^ String to hold the result of atoi for comparison later.
     // Initialized to the char count of the input char[]
     // for optimal space complexity.
@@ -74,9 +74,11 @@ int parseSpaceSeperated(char *in, int *nums) {
             // If the found number was found by a newline, we are done. Break loop.
         }
     }
+    return count;
+    // ^ Just in-case size is 0
 }
 
-int sum(const int *array, const int *size) {
+int sum(int const *array, int const *size) {
     int sum = 0;
     for (int i = 0; i < *size; i++) {
         sum += array[i];
@@ -85,7 +87,7 @@ int sum(const int *array, const int *size) {
     return sum;
 }
 
-int findLargest(const int *array, const int *size) {
+int findLargest(int const *array, int const *size) {
     int largest = array[0];
     for (int i = 0; i < *size; i++) {
         if (array[i] > largest)
@@ -95,7 +97,7 @@ int findLargest(const int *array, const int *size) {
     return largest;
 }
 
-int findSmallest(const int *array, const int *size) {
+int findSmallest(int const *array, int const *size) {
     int smallest = array[0];
     for (int i = 0; i < *size; i++) {
         if (array[i] < smallest)
