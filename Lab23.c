@@ -1,4 +1,4 @@
-// Lab 2: Functions, Pointers, and Arrays.
+// Lab 23: Functions, Pointers, and Arrays.
 // Jon Mitchell & Tom Arklie
 
 #include <stdio.h>
