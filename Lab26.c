@@ -3,13 +3,12 @@
 
 #include <stdio.h>
 #include <string.h>
-
+#include <ctype.h>
 int countVowels(char word[]) {
     int count = 0;
-    word = strlwr(word);
     // ^ Converting word to lowercase to avoid case-sensitive related errors
     for (int i = 0; i < strlen(word); i++) {
-        switch (word[i]) {
+        switch (tolower(word[i])) {
             case 'a':
             case 'e':
             case 'i':
