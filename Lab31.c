@@ -3,10 +3,45 @@
 #include <string.h>
 
 /*
- * Turnover time, set the arrival time to the time unit that the process starts. Default set to -1. If AT > -1, it has been started.
+ * Turnover time, set the arrival time to the time unit that the process starts.
+ * Default set to -1. If AT > -1, it has been started.
+ *
+ * LOGIC:
+ * PROCESS COUNTING and REGISTRATION:
+ * Take, as input, the number of processes
+ * Prepare next process cache to point to the first index of ProcessList (set to 0 for index 1)
+ *
+ * SETTING EACH PROCESSES CONDITIONS:
+ * loop through those processes and add them to a list of all processes according to input
+ * > if the inputted arrival time is less than the arrival time of the process in the index of nextProcess's value and != 0
+ * >> nextProcess = the newly made process
+ * > If the arrival time entered is 0
+ * >> immediately add it to the readyQueue and set RUNNING = 1
+ *
+ * MAIN EXECUTION TICK:
+ * While the number of completed processes is less than the TOTAL_PROCESSES, start and continue exec loop
+ *
+ *  --> Check if there is a new process getting appended <--
+ * > If nextProcess is found to have ARRIVAL_TIME = time and RUNNING = 0
+ * >> Set RUNNING = 1 and Add next process to readyQueue
+ * >> Call getNextProcess(int* processes) method
+ *
+ *  --> Execute the process to the time quantum or end of remaining time <--
+ * at the current readyQueue position, begin execution of the program located at that index.
+ * > If program has remaining time and currentQuantum < QUANTUM and RUNNING == 1
+ * >> Increment time, currentQuantum
+ * >> Decrement remaining time
+ *
+ *  --> If the REMAINING_TIME becomes 0 here, the process is completed, and we can move on to the next process.
+ * >> If REMAINING_TIME == 0
+ * >>> RUNNING = -1. I'm setting it to -1 here to differentiate between a standby process and a completed one.
+ * >>> Completed++
+ * >>> readyQueuePos = readyQueuePos == TOTAL_PROCESSES-1 ? readyQueuePos = 0 : ++
+ * 
  */
 
 typedef struct {
+    int RUNNING;
     int PID;
     int ARRIVAL_TIME;
     int REMANING_TIME;
@@ -16,6 +51,7 @@ typedef struct {
 
 Process initProcess(int PID, int AT, int RT) {
     Process p;
+    p.RUNNING = 0;
     p.PID = PID;
     p.ARRIVAL_TIME = AT;
     p.REMANING_TIME = RT;
@@ -98,10 +134,20 @@ int parseSpaceSeperated(char *in, int *nums) {
 // ^ A method that takes in a buffer of possible numbers and, if all are numbers,
 // the int array that was passed into the method will have it's values set to the numbers in the buffer.
 
+int getNextProcess(Process *processes, int *TOTAL) {
+    int nextProcess = 0;
+    for (int i = 0; i < *TOTAL; i++) {
+        if (processes[i].ARRIVAL_TIME < processes[nextProcess].ARRIVAL_TIME && processes[i].RUNNING == 0)
+            nextProcess = i;
+    }
+    return nextProcess;
+}
+
 int main() {
     char buff[80];
-    int TOTAL_PROCESSES = 20, QUANTUM = 4, CURRENT_PROCESS, input[2], count, readyQueuePos = 0, currentTime = 0, completed = 0;
 
+    // PROCESS COUNTING AND REGISTRATION
+    int TOTAL_PROCESSES = 20;
     printf("Enter the number of processes (20 or less): ");
     fgets(buff, sizeof(buff), stdin);
     if (!isDigit(buff)) {
@@ -109,19 +155,18 @@ int main() {
         return -1;
     }
     // ^ Characters entered were detected to not be numbers.
-
     TOTAL_PROCESSES = (atoi(buff) >= 0 && atoi(buff) <= 20) ? atoi(buff) : -1;
     if (TOTAL_PROCESSES == -1) {
         printf("Number entered was detected to not be within 0 to 20. Aborting.");
         return -2;
     }
     // ^ Integer entered was not from 0 to 20.
-
     Process processList[TOTAL_PROCESSES];
     Process readyQueue[TOTAL_PROCESSES];
     // ^ A list of all processes and then a readyQueue for all processes in the round-robin.
 
-    int nextProcess = 0;
+    // SETTING EACH PROCESSES CONDITIONS
+    int nextProcess = 0, count, input[2], readyQueuePos = 0;
     // ^ Saving the index of the next process to lessen list iteration.
     for (int i = 0; i < TOTAL_PROCESSES; i++) {
         printf("Enter the Arrival Time and Total Burst Time for process %d seperated by a space", i);
@@ -135,7 +180,7 @@ int main() {
         // ^ If there aren't exactly 2 inputs, one for AT and one for RT, then abort the program.
         processList[i] = initProcess(i, input[0], input[1]);
         // ^ If input was valid, set the PID to the current loop, AT to the first input, and RT to the second.
-        if (processList[nextProcess].ARRIVAL_TIME > processList[i].ARRIVAL_TIME) {
+        if (processList[i].ARRIVAL_TIME < processList[nextProcess].ARRIVAL_TIME) {
             nextProcess = i;
         }
         if (input[0] == 0) {
@@ -146,41 +191,56 @@ int main() {
         buff[0] = '\0';
         // ^ Put nullterm at the first index of the buffer to "clear" the buffer.
     }
-    // Making the processes
-    for (int time = 0; completed < TOTAL_PROCESSES; time++) { // Main loop
-        int currentQuantum = 0;
+
+    printf("Execution order is listed vertically with the current time to the left of the process '<time> | Process <#>'\n For Example:\n");
+    printf("15 | Process 7\n\n\n <--- EXECUTION START ---> \n");
+
+    // MAIN EXECUTION TICK
+    int currentQuantum = 0, QUANTUM = 4, CURRENT_PROCESS = 0, completed = 0, readyQueueSize = 0, time = -1;
+    while (completed < TOTAL_PROCESSES) { // Main loop
+        time++;
+        // CHECK IF NEW PROCESS IS GETTING APPENDED
         if (time == processList[nextProcess].ARRIVAL_TIME) {
             // ^ If time quantum equals the arrival time of next process...
+            processList[nextProcess].RUNNING = 1;
             readyQueue[readyQueuePos] = processList[nextProcess];
-            nextProcess = 0;
-            readyQueuePos++;
-            // ^ Add the next process to the next spot in the ready queue, reset nextProcess to 0, so we iterate from the
-            // beginning of the processList when looking for our next process,
-            // and increment the next spot in the ready queue.
-            for (int pro = 0; pro < TOTAL_PROCESSES; pro++) {
-                // While the current process is less than the total (going by index)
-                int running = 0;
-                // This boolean is used for loop control.
-                for (int run = 0; run <= readyQueuePos; run++) {
-                    // ^ While
-                    if (processList[pro].PID == readyQueue[run].PID) {
-                        running = 1;
-                        break;
-                    }
-                }
-                if (running == 1)
-                    continue;
-                if (processList[pro].ARRIVAL_TIME < processList[nextProcess].ARRIVAL_TIME)
-                    nextProcess = pro;
-            }
+            readyQueueSize++; readyQueuePos++;
+            nextProcess = getNextProcess(processList, &TOTAL_PROCESSES);
+            // ^ Set the process to running so that getting the next process is easier,
+            // then add the process to the readyQueue,
+            // then increment the readyQueuePos for the next time this runs.
+            // then get the next process,
         }
-        // ^ This is for if the current time quantum matches the arrival time of a process that ISN'T running in the
-        // process list.
-        if (readyQueuePos == 0)
+        
+        if ((readyQueueSize) == 0)
             continue;
 
+        // EXECUTE THE PROCESS TO TIME QUANTUM OR REMAINING_TIME == 0
+        if (currentQuantum == QUANTUM) {
+            CURRENT_PROCESS = (CURRENT_PROCESS >= TOTAL_PROCESSES - 1) ? 0 : CURRENT_PROCESS + 1;
+            currentQuantum = 0;
+        }
+        // ^ When the currentQuantum reaches the max quantum, swap processes and reset the currentQuantum.
+        if (readyQueue[CURRENT_PROCESS].RUNNING == 1 
+            && readyQueue[CURRENT_PROCESS].REMANING_TIME > 0) {
+            // ^ If the current process is running, have a positive remaining time, and the current quantum is within
+            // the quantum limit, run the program another cycle.
+            time++; currentQuantum++; readyQueue[CURRENT_PROCESS].REMANING_TIME--;
+            // Increment the total time, the current quantum, and decrement the processes remaining time.
+            if (readyQueue[CURRENT_PROCESS].REMANING_TIME == 0) {
+                readyQueue[CURRENT_PROCESS].RUNNING = -1; completed++;
+                CURRENT_PROCESS = (CURRENT_PROCESS >= TOTAL_PROCESSES-1) ? 0 : CURRENT_PROCESS + 1;
+                // ^ If the programs remaining time is now 0, set RUNNING to -1 (meaning completed) and
+                // increment the number of completed processes
+            }
+        }
         // ^ Above this will be the remaining time decrements and such from the ready que along with the time vs quantum counter
+        printf("%d | Process %d\n", time, readyQueue[CURRENT_PROCESS].PID);
     }
 
+    printf("\n\n <--- Turnover Times ---> \n");
+    for (int i = 0; i < TOTAL_PROCESSES; i++) {
+        printf("Process %d Turnover: %d\n", readyQueue[i].PID, (time - readyQueue[i].ARRIVAL_TIME));
+    }
     return 0;
 }
