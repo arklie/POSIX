@@ -134,10 +134,10 @@ int parseSpaceSeperated(char *in, int *nums) {
 // ^ A method that takes in a buffer of possible numbers and, if all are numbers,
 // the int array that was passed into the method will have it's values set to the numbers in the buffer.
 
-int getNextProcess(Process *processes, int *TOTAL) {
-    int nextProcess = 0;
+int getNextProcess(Process *processes, const int *TOTAL) {
+    int nextProcess = -1;
     for (int i = 0; i < *TOTAL; i++) {
-        if (processes[i].ARRIVAL_TIME < processes[nextProcess].ARRIVAL_TIME && processes[i].RUNNING == 0)
+        if (processes[i].RUNNING == 0 && (nextProcess == -1 || processes[nextProcess].ARRIVAL_TIME > processes[i].ARRIVAL_TIME))
             nextProcess = i;
     }
     return nextProcess;
@@ -192,8 +192,8 @@ int main() {
         // ^ Put nullterm at the first index of the buffer to "clear" the buffer.
     }
 
-    printf("Execution order is listed vertically with the current time to the left of the process '<time> | Process <#>'\n For Example:\n");
-    printf("15 | Process 7\n\n\n <--- EXECUTION START ---> \n");
+    printf("Execution order is listed vertically with the current time to the left of the process '<time> | Process <#>' | Remaining time\n For Example:\n");
+    printf("15 | Process 7 | 23\n\n\n <--- EXECUTION START ---> \n");
 
     // MAIN EXECUTION TICK
     int currentQuantum = 0, QUANTUM = 4, CURRENT_PROCESS = 0, completed = 0, readyQueueSize = 0, time = -1;
@@ -203,8 +203,11 @@ int main() {
         if (time == processList[nextProcess].ARRIVAL_TIME) {
             // ^ If time quantum equals the arrival time of next process...
             processList[nextProcess].RUNNING = 1;
-            readyQueue[readyQueuePos] = processList[nextProcess];
-            readyQueueSize++; readyQueuePos++;
+            readyQueue[readyQueueSize] = processList[nextProcess];
+            if (completed == readyQueueSize)
+                CURRENT_PROCESS = readyQueueSize;
+            // ^ If all current readyQueue processes are completed, make sure we start the execution on the new process immediately.
+            readyQueueSize++;
             nextProcess = getNextProcess(processList, &TOTAL_PROCESSES);
             // ^ Set the process to running so that getting the next process is easier,
             // then add the process to the readyQueue,
@@ -217,25 +220,29 @@ int main() {
 
         // EXECUTE THE PROCESS TO TIME QUANTUM OR REMAINING_TIME == 0
         if (currentQuantum == QUANTUM) {
-            CURRENT_PROCESS = (CURRENT_PROCESS >= TOTAL_PROCESSES - 1) ? 0 : CURRENT_PROCESS + 1;
+            CURRENT_PROCESS = (CURRENT_PROCESS >= readyQueueSize - 1) ? 0 : CURRENT_PROCESS + 1;
             currentQuantum = 0;
         }
         // ^ When the currentQuantum reaches the max quantum, swap processes and reset the currentQuantum.
+        while (readyQueue[CURRENT_PROCESS].RUNNING == -1)
+            CURRENT_PROCESS = (CURRENT_PROCESS >= readyQueueSize-1) ? 0 : CURRENT_PROCESS + 1;
+        // ^ Prevent skipping during the discovery of completed processes.
         if (readyQueue[CURRENT_PROCESS].RUNNING == 1 
             && readyQueue[CURRENT_PROCESS].REMANING_TIME > 0) {
             // ^ If the current process is running, have a positive remaining time, and the current quantum is within
             // the quantum limit, run the program another cycle.
-            time++; currentQuantum++; readyQueue[CURRENT_PROCESS].REMANING_TIME--;
+            readyQueue[CURRENT_PROCESS].REMANING_TIME--;
             // Increment the total time, the current quantum, and decrement the processes remaining time.
             if (readyQueue[CURRENT_PROCESS].REMANING_TIME == 0) {
                 readyQueue[CURRENT_PROCESS].RUNNING = -1; completed++;
-                CURRENT_PROCESS = (CURRENT_PROCESS >= TOTAL_PROCESSES-1) ? 0 : CURRENT_PROCESS + 1;
+                CURRENT_PROCESS = (CURRENT_PROCESS >= readyQueueSize-1) ? 0 : CURRENT_PROCESS + 1;
                 // ^ If the programs remaining time is now 0, set RUNNING to -1 (meaning completed) and
                 // increment the number of completed processes
             }
+            printf("%d | Process %d | %d\n", time, readyQueue[CURRENT_PROCESS].PID, readyQueue[CURRENT_PROCESS].REMANING_TIME);
         }
+        currentQuantum++;
         // ^ Above this will be the remaining time decrements and such from the ready que along with the time vs quantum counter
-        printf("%d | Process %d\n", time, readyQueue[CURRENT_PROCESS].PID);
     }
 
     printf("\n\n <--- Turnover Times ---> \n");
