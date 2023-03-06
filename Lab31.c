@@ -51,6 +51,7 @@ typedef struct {
     int PID;
     int ARRIVAL_TIME;
     int REMANING_TIME;
+    int COMPLETION_TIME;
     // ^ This is initially the burst time before it's first cycle. There is no need to waste memory keeping the
 } Process;
 // ^ The struct representing the faux process.
@@ -67,6 +68,7 @@ Process initProcess(int PID, int AT, int RT) {
 
 int isDigit(char *in) { // Verify the input is a digit.
     int count = 0;
+    int str_len = strlen(in);
     // ^ Will be responsible for counding leading zeros... should there be any.
     for (int i = 0; in[0] == '0' && i < strlen(in); i++) {
         // ^ First checks if index 0 of the entered number string is a 0, if so, start the removal.
@@ -86,7 +88,7 @@ int isDigit(char *in) { // Verify the input is a digit.
             }
         }
     }
-    char *p = malloc(sizeof(char) * (strlen(in) + 1));
+    char *p = malloc(sizeof(char) * (str_len + 1));
     // ^ String to hold the result of atoi for comparison later.
     // Initialized to the char count of the input char[]
     // for optimal space complexity.
@@ -94,18 +96,18 @@ int isDigit(char *in) { // Verify the input is a digit.
     // ^ Attempting to make an int from the input
     sprintf(p, "%d", n);
     // ^ Taking the value of n gotten from atoi and writing it to
-    if (in[strlen(in) - 1] == '\n')
-        in[strlen(in) - 1] = '\0';
+    if (in[str_len - 1] == '\n')
+        in[str_len - 1] = '\0';
     return strcmp(in, p) == 0;
 }
 
 int parseSpaceSeperated(char *in, int *nums) {
-    int begin = 0, count = 0;
+    int begin = 0, count = 0, str_len = strlen(in);
     // ^ We need a number array of 5, a begin index marker to mark the start of a number, and the count of numbers found
     char *p = malloc(sizeof(in));
     // ^ We need a buffer that can handle the substrings we'll make to parse the spaces in the input.
 
-    for (int i = 0; i < strlen(in); i++) {
+    for (int i = 0; i < str_len; i++) {
         // ^ As long as i is less than the string length of the input and we haven't yet found 5 numbers, loop.
         if (in[i] == '\0')
             return count;
@@ -151,6 +153,7 @@ int getNextProcess(Process *processes, const int *TOTAL) {
 
 int main() {
     char buff[80];
+    int buffatoi;
 
     // PROCESS COUNTING AND REGISTRATION
     int TOTAL_PROCESSES = 20;
@@ -160,8 +163,9 @@ int main() {
         printf("Number entered was detected to not be a valid integer. Aborting.");
         return -1;
     }
+    buffatoi = atoi(buff);
     // ^ Characters entered were detected to not be numbers.
-    TOTAL_PROCESSES = (atoi(buff) >= 0 && atoi(buff) <= 20) ? atoi(buff) : -1;
+    TOTAL_PROCESSES = (buffatoi >= 0 && buffatoi <= 20) ? buffatoi : -1;
     if (TOTAL_PROCESSES == -1) {
         printf("Number entered was detected to not be within 0 to 20. Aborting.");
         return -2;
@@ -240,7 +244,8 @@ int main() {
             readyQueue[CURRENT_PROCESS].REMANING_TIME--;
             // Increment the total time, the current quantum, and decrement the processes remaining time.
             if (readyQueue[CURRENT_PROCESS].REMANING_TIME == 0) {
-                readyQueue[CURRENT_PROCESS].RUNNING = -1; completed++;
+                readyQueue[CURRENT_PROCESS].RUNNING = -1; readyQueue[CURRENT_PROCESS].COMPLETION_TIME = time;
+                completed++;
                 CURRENT_PROCESS = (CURRENT_PROCESS >= readyQueueSize-1) ? 0 : CURRENT_PROCESS + 1;
                 // ^ If the programs remaining time is now 0, set RUNNING to -1 (meaning completed) and
                 // increment the number of completed processes
@@ -253,7 +258,7 @@ int main() {
 
     printf("\n\n <--- Turnover Times ---> \n");
     for (int i = 0; i < TOTAL_PROCESSES; i++) {
-        printf("Process %d Turnover: %d\n", readyQueue[i].PID, (time - readyQueue[i].ARRIVAL_TIME));
+        printf("Process %d Turnover: %d\n", readyQueue[i].PID, (readyQueue[i].COMPLETION_TIME - readyQueue[i].ARRIVAL_TIME));
     }
     return 0;
 }
