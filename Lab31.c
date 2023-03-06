@@ -20,24 +20,30 @@
  *
  * MAIN EXECUTION TICK:
  * While the number of completed processes is less than the TOTAL_PROCESSES, start and continue exec loop
+ * Increment time
  *
  *  --> Check if there is a new process getting appended <--
  * > If nextProcess is found to have ARRIVAL_TIME = time and RUNNING = 0
  * >> Set RUNNING = 1 and Add next process to readyQueue
+ * >> If all readyQueue Process are completed
+ * >>> Set CURRENT_PROCESS to the newly added process to immediately start exec
  * >> Call getNextProcess(int* processes) method
  *
  *  --> Execute the process to the time quantum or end of remaining time <--
- * at the current readyQueue position, begin execution of the program located at that index.
- * > If program has remaining time and currentQuantum < QUANTUM and RUNNING == 1
- * >> Increment time, currentQuantum
- * >> Decrement remaining time
+ * if currentQuantum == QUANTUM
+ * > Move to next process
+ * If the current process.RUNNING = -1
+ * > Cycle through readyqueue until we find a process that isn't complete
+ *  If program has remaining time and RUNNING == 1
+ * > Decrement remaining time
  *
- *  --> If the REMAINING_TIME becomes 0 here, the process is completed, and we can move on to the next process.
- * >> If REMAINING_TIME == 0
- * >>> RUNNING = -1. I'm setting it to -1 here to differentiate between a standby process and a completed one.
- * >>> Completed++
- * >>> readyQueuePos = readyQueuePos == TOTAL_PROCESSES-1 ? readyQueuePos = 0 : ++
- * 
+ * -- > If the REMAINING_TIME becomes 0 here then it has finished and we can move on < --
+ * > if current process will finish
+ * >> set running to -1 and increment the completed count
+ * >> Set current process to the next in the queue or to index 0 if we are the end of queue
+ *
+ * Print the execution message
+ * increment the current quantum
  */
 
 typedef struct {
@@ -169,7 +175,7 @@ int main() {
     int nextProcess = 0, count, input[2], readyQueuePos = 0;
     // ^ Saving the index of the next process to lessen list iteration.
     for (int i = 0; i < TOTAL_PROCESSES; i++) {
-        printf("Enter the Arrival Time and Total Burst Time for process %d seperated by a space", i);
+        printf("Enter the Arrival Time and Total Burst Time for process %d seperated by a space: ", i);
         fgets(buff, sizeof(buff), stdin);
         count = parseSpaceSeperated(buff, &input);
         // ^ Parse the space seperate arrival and running time for the process.
@@ -215,7 +221,7 @@ int main() {
             // then get the next process,
         }
         
-        if ((readyQueueSize) == 0)
+        if ((readyQueueSize) == 0 || completed == readyQueueSize)
             continue;
 
         // EXECUTE THE PROCESS TO TIME QUANTUM OR REMAINING_TIME == 0
