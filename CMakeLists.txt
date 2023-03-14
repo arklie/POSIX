@@ -4,3 +4,4 @@ project(Lab1 C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(Lab31 Lab31.c)
+add_executable(Lab32 Lab32.c)
