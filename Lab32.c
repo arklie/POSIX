@@ -9,7 +9,7 @@
  */
 
 typedef struct {
-    int RUNNING;
+    short RUNNING;
     int PID;
     int ARRIVAL_TIME;
     int REMAINING_TIME;
@@ -100,8 +100,35 @@ int parseSpaceSeperated(char *in, int *nums) {
     // ^ Just in-case size is 0
 }
 
-int getNextProcess() {
+int getNextProcess(Process *pList, int *TOTAL) {
+    for (int i = 0; i < *TOTAL; i++) {
 
+    }
+}
+
+void sortProcesses(Process *pList, const int *TOTAL, int *foundList, int *found) {
+    int next = 0;
+    while (*TOTAL > *found) {
+    // ^ While we haven't found all processes and ordered them
+        for (int i = 0; i < *TOTAL; i++) {
+            // ^ While the current iteration is under the total count of processes and we haven't found every process
+            if (pList[i].ARRIVAL_TIME < pList[next].ARRIVAL_TIME) {
+                // ^ Check if the current processes arrival time is less than the last found "best".
+                for (int z = 0; z < *found; z++) {
+                    // ^ If it is considered better, loop through the current list of found processes
+                    next = (pList[i].PID == pList[found[z]].PID) ? next : i;
+                    // ^ On each found process, check if the PID of a prev found process matches the current new "best" process
+                    // ^ If it does match, next the next best stays the same, otherwise, set the next best to the current process
+                }
+            }
+        }
+        foundList[*found] = next;
+        // ^ After we reach the end of the list of processes, add the found next best to the found list at the index of the total
+        // number of found processes. Since array index's start at 0 but we count from 1, this should add the process to the
+        // index before the total found count. Avoiding the off-by-one error.
+        *found++;
+        // ^ Increment the found count
+    }
 }
 
 int main() {
@@ -125,7 +152,7 @@ int main() {
 
     // SETTING EACH PROCESSES PROPERTIES
     Process processList[TOTAL_PROCESSES];
-    int inNums[3], count, nextProcess = 0, lowPri = 0, medPri = 0, hiPri = 0;
+    int inNums[3], count, lowPri = 0, medPri = 0, hiPri = 0;
     for (int i = 0; i < TOTAL_PROCESSES; i++) {
         printf("Enter the Arrival Time, Burst Time, and Priority of seperated by spaces for Process %d", i);
         fgets(buff, sizeof(buff), stdin);
@@ -153,4 +180,10 @@ int main() {
 
     // Sorting Processes into their Priority Queues by Arrival Time
     Process lowQueue[lowPri], medQueue[medPri], hiQueue[hiPri];
+    lowPri = 0; medPri = 0; hiPri = 0;
+    int added[TOTAL_PROCESSES], nextProcess = 0;
+    count = 0;
+    while (count < TOTAL_PROCESSES) {
+
+    }
 }
