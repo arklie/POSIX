@@ -100,9 +100,13 @@ int parseSpaceSeperated(char *in, int *nums) {
     // ^ Just in-case size is 0
 }
 
-int getNextProcess(Process *pList, int *TOTAL) {
+int getNextProcess(Process *pList, int *TOTAL, Process *lList, int *lCount, Process *mList, int *mCount, Process *hList, int *hCount) {
+    int next = 0, index;
     for (int i = 0; i < *TOTAL; i++) {
-
+        index = 0;
+        while (index < hCount) {
+            next = ()
+        }
     }
 }
 
@@ -133,7 +137,7 @@ void sortProcesses(Process *pList, const int *TOTAL, int *foundList, int *found)
 
 int main() {
     char buff[80];
-    int buffatoi, TOTAL_PROCESSES, QUANTUM = 4;
+    int buffatoi, TOTAL_PROCESSES;
 
     // GETTING NUMBER OF PROCESSES
     printf("Enter the number of process (Max 20): ");
@@ -180,10 +184,29 @@ int main() {
 
     // Sorting Processes into their Priority Queues by Arrival Time
     Process lowQueue[lowPri], medQueue[medPri], hiQueue[hiPri];
+    int foundList[TOTAL_PROCESSES], found;
     lowPri = 0; medPri = 0; hiPri = 0;
-    int added[TOTAL_PROCESSES], nextProcess = 0;
-    count = 0;
-    while (count < TOTAL_PROCESSES) {
-
+    sortProcesses(&processList, &TOTAL_PROCESSES, &foundList, &found);
+    for (int i = 0; i < TOTAL_PROCESSES; i++) {
+        switch (processList[foundList[i]].PRIORITY) {
+            case 1:
+                lowQueue[lowPri] = processList[foundList[i]];
+                lowPri++;
+                break;
+            case 2:
+                medQueue[medPri] = processList[foundList[i]];
+                medPri++;
+                break;
+            case 3:
+                hiQueue[hiPri] = processList[foundList[i]];
+                hiPri++;
+                break;
+        }
+        // ^ Depending on the priority of the next process in the sorted foundList
+        // processes will be placed in their respective queues.
     }
+
+    // MAIN EXECUTION TICK
+    int currentQuantum= 0, QUANTUM = 4, currentPri = 3, ;
+    while ()
 }
